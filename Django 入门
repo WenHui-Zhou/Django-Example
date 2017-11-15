@@ -1,0 +1,21 @@
+Django入门
+============
+
+Django的结构
+---------
+
+Django使用Python写的web框架。
+
+Django 中比较重要文件介绍：
+
+ - urls.py 网址入口，关联对应的views.py 中的一个函数，访问网址就对应一个函数。
+ - views.py ：处理用户发出的请求，从urls.py中对应过来，通过渲染templates中的网页可以将显示内容输出到网页。
+ - models.py：与数据库操作相关，存入或读取数据时用到这个
+ - forms.py ：表单，用户在浏览器上输入数据提交，对数据的验证与输入框的生成工作
+ - templates 文件夹：views.py 中函数渲染的templates中的html模板，得到动态内容的网页，当然可以用缓存来提高速度。
+ - admin.py ：后台，可以用很少的代码就拥有一个强大的后台。
+ - settings.py：Django的设置，配置文件，比如DEBUG的开关，静态文件位置等
+
+Django 的基本命令
+------------
+
