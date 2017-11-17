@@ -16,6 +16,138 @@ Django 中比较重要文件介绍：
  - admin.py ：后台，可以用很少的代码就拥有一个强大的后台。
  - settings.py：Django的设置，配置文件，比如DEBUG的开关，静态文件位置等
 
-Django 的基本命令
+Django 视图与网址
 ------------
+
+在pycharm专业版里头新建Django项目mysite,其目录结构如下：
+
+    mysite
+    ├── manage.py
+    └── mysite
+        ├── __init__.py
+        ├── settings.py
+        ├── urls.py
+        └── wsgi.py
+
+在mysite目录下再新建一个应用learn，打开manage.py 命令行，输入`startapp learn` ，新建了一个名为learn的应用，目录如下：
+
+    learn/
+    ├── migrations
+    ├── __init__.py
+    ├── admin.py
+    ├── models.py
+    ├── tests.py
+    └── views.py
+
+我们将新定义的app加到网站mysite的settings.py 中的`INSTALL_APPS` 中：
+
+修改mysite/mysite/settings.py:
+
+    INSTALLED_APPS = 
+    (
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+       
+        'learn',  #新加入的部分
+    )
+
+这一步将新建的app加入到INSTALL_APPS 中的目的是为了让Django自动找到该app的模板文件（learn/templates/文件）以及静态文件（learn/static/文件）
+
+定义视图函数（访问页面）
+------------
+
+打开learn的view.py文件，写入如下代码：
+
+    #coding:utf-8
+    from django.http import HttpResponse
+    
+    def index(request):
+        return HttpResponse(u"我是超市管理系统")
+
+第一行声明编码为：`utf-8` 。第二行引入HttpResponse，用来向网页返回内容。我们还定义了一个index()，其第一个参数必须是request，用于响应页面发来的请求，request中有get和post的内容，用于信息的交互。但是如何调用这个函数呢？  继续往下看。
+
+定义视图函数相关的URL（网址）
+----------------
+
+打开mysite/mysite/urls.py 文件，修改如下：
+
+    from django.conf.urls import url
+    from django.contrib import admin
+    from learn import views as learn_views  # new
+     
+    urlpatterns = [
+        url(r'^$', learn_views.index),  # new
+        url(r'^admin/', admin.site.urls),
+    ]
+   
+这时候访问页面 `127.0.0.1:8000` 就会访问到这个index函数了。
+
+在views.py 中在新建一个函数add:
+
+    def add(request):
+        a = request.GET['a']  #request.GET类似一个字典，可以用request.GET('a',0)
+        b = request.GET['b']
+        c = int(a)+int(b)
+        return HttpResponse(str(c))
+
+这时候urls添加一条：
+
+    url(r'add/$',learn_views.add,name='add')
+
+
+这时候访问这个函数需要这样：
+
+    http://127.0.0.1:8000/add/?a=4&b=5
+
+传参数的方式后有一种，在views中定义add2：
+
+    def add2(request,a,b):
+        c = int(a)+int(b)
+        return HttpResponse(str(c))
+
+在url在定义网址：
+
+    url(r'add/(\d+)/(\d+)/$',learn_views.add2,name='add2')
+访问时输入网址：
+
+     http://127.0.0.1:8000/add/4/5/
+
+对于上面在url文件中的新添的url语句：
+
+    url(r'^add/$',learn_views.add,name='add')
+
+这里`name='add'` 用于在`templates` ，`models` ，`views` ... 中得到对应的网址，相当于给网址取了个名字。
+
+接下来我们建立一个有html渲染过的页面，并试验name的作用。
+
+修改learn/views.py 中index函数为：
+
+    def index(request):
+        return render(request,'home.html')
+
+render是渲染模板，当执行到render的时候，Django会自动找到在mysite下注册的各个app的templates中的文件。
+
+在learn中新建一个templates文件夹，或者直接在`mysite`的`templates`文件夹上新建`home.html` :
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>超市销售记录</title>
+    </head>
+    <body>
+    <a href = '/add/4/5/'>计算4+5</a>
+    <a href = '{% url 'add2' 4 5 %}'>计算4+5</a>
+    </body>
+    </html>
+
+在urls中修改访问url:
+
+    url(r'^$',learn_views.index,name='home')
+    url(r'^add/(\d+)/(\d+)/$', learn_views.add2, name='add2')
+    ...
 
