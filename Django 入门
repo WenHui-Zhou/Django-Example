@@ -286,3 +286,22 @@ render(request,'nav.html',{'alist':alist})
 Django 数据库模型
 ------------
 
+Django模型是与数据库相关的，与数据库相关的代码一般写在`models.py` 中，Django支持多种数据库，只需要在settings.py中配置数据库，不需要修改models中的代码就可以使用。
+
+在learn的models中写入如下代码：
+
+    from django.db import models
+    
+    class Person(models.Model):
+        name = models.CharField(max_length=30)
+        age = models.IntegerField()
+	    def __unicode__(self):  #显示出查询结果
+        return self.name
+此时进入命令行（shell）状态，输入`makemigrations` ，之后再输入`migrate` 就在后台生成了一张Person的表。有age和name的字段。
+
+使用Django提供的QuerySet API 对数据库进行操作（shell环境下）：
+
+    from learn.models import Person
+    Person.objects.create(name='aa',age=23) #创建一条记录
+    Person.objects.get(name='aa') #查询
+    
