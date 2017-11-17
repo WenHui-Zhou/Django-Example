@@ -304,5 +304,6 @@ Django模型是与数据库相关的，与数据库相关的代码一般写在`m
     from learn.models import Person
     Person.objects.create(name='aa',age=23) #创建一条记录
     Person.objects.get(name='aa') #查询
-    Person.objects.all()#获取对象：
+    Person.objects.all()#获取对象
+    Person.objects.filer(name='a')#筛选
    
