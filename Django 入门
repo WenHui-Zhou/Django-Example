@@ -307,3 +307,113 @@ Django模型是与数据库相关的，与数据库相关的代码一般写在`m
     Person.objects.all()#获取对象
     Person.objects.filer(name='a')#筛选
    
+使用以上的表（Person[name,age]）进行数据库的操作：
+
+**插入记录：**
+
+ - Person.objects.create(name='11',age=11)
+ - Person.objects.get_or_create(name='11',age=11)
+ - p = Person(name='11')   p.age = 11 p.save()
+
+**数据对象的获取**
+
+ - a = Person.objects.all() #a 是一个QuerySet,通过a= list(a) 的方式来获取一个存在list中的数据
+ - Person.objects.filiter(name='11')  #选出name=11 的那个
+ - Person.objects.exclude(name__contains='qq') 排除name中函数qq的对象
+
+**删除记录**
+
+ - Person.objects.filiter(name__contains='aa').delete()
+
+**更新操作**
+
+ - Person.objects.filiter(name__contains='aa').update(name='xxx')
+
+**单个对象的更新**
+
+    tw = Person.objects.get(name = 'xxx')
+    tw.age = 11
+    tw.name = 12
+
+**获取某些字段**
+
+    person = Person.objects.values_list('name','age')
+    这时候person 就是一个函数两项元素的QuerySet
+    list(person) 可以得到这个元组的list
+
+如果只要一个字段：
+
+    Person.objects.values_list('name',flat=True)
+
+**获得字典形式的结果**
+
+    使用value
+    a=Person.objects.values('name','q')
+    得到的结果a是一个list里头装着dict
+
+使用Django的后台
+-----------
+
+后台的网址是：127.0.0.1.8000/admin
+
+首先我们在manage.py 的环境下输入createsuperuser 来创建一个管理员。紧接着要求输入用户名和密码，输完之后就可以了。
+
+这时候还没完，要在后台显示创建的数据库还需要如下操作：
+
+假设我们已经在blog应用中创建好了一个数据库Person[name,age]。打开blog应用下的admin.py文件。修改如下：
+
+    from django.contrib import admin
+    from .models import Person
+    class PersonAdmin(admin.ModelAdmin):
+    list_display = ('name','age',)
+    Admin.site.register(Person,PersonAdmin)
+
+就可以在后台显示出数据库了。其中class
+的作用是在数据表中显示出每个字段。
+
+注意：在我们在models中建表的时候，在最后添上函数：
+
+    def __str__(self):
+        return self.name
+这样在查询的时候，返回一个QuerySet，由于添加了这个函数，可以在显示出记录的时候就能显示他的name了
+
+**表单操作**
+
+在blog应用程序中新建一个`form.py` 文件：
+
+    from django import forms
+     
+    class AddForm(forms.Form):
+        a = forms.IntegerField()
+        b = forms.CharField(max_length=10)
+
+视图函数：
+
+    # coding:utf-8
+    from django.shortcuts import render
+    from django.http import HttpResponse
+     
+    # 引入我们创建的表单类
+    from .forms import AddForm
+     
+    def index(request):
+        if request.method == 'POST':# 当提交表单时
+         
+            form = AddForm(request.POST) # form 包含提交的数据
+             
+            if form.is_valid():# 如果提交的数据合法
+                a = form.cleaned_data['a']
+                b = form.cleaned_data['b']
+                return HttpResponse(str(int(a) + int(b)))
+         
+        else:# 当正常访问时
+            form = AddForm()
+        return render(request, 'index.html', {'form': form})
+
+对应模板：
+
+    <form method='post'>
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="提交">
+    </form>
